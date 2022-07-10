@@ -241,7 +241,8 @@ fn get_card_name(value: usize, suit: &str) -> String {
 
 fn index_to_value_str(index: usize) -> usize {
     let value = (13 - (index % 13)) + 1;
-    return value;
+    let ret = if value == 14 {1} else {value};
+    return ret;
 }
 
 fn index_to_suit(index: usize) -> &'static str {
