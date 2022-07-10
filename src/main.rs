@@ -1,8 +1,8 @@
-use image::{GenericImageView, ImageBuffer, ImageFormat};
-use std::fs;
+use image::{GenericImageView, ImageFormat};
 use serde_derive::Deserialize;
 use serde_derive::Serialize;
 use serde_json::Value;
+use std::fs;
 
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -87,8 +87,7 @@ pub struct First {
 
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
-pub struct ExternalObjects {
-}
+pub struct ExternalObjects {}
 
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -230,37 +229,34 @@ pub struct Border {
     pub w: i64,
 }
 
-
-fn getCardName(value: usize, suit: &str) -> String {
+fn get_card_name(value: usize, suit: &str) -> String {
     let card_name: String;
-    if (suit == "Back") {
-        card_name = format!("Card {suit}");
+    if suit == "Back" {
+        card_name = format!("Card_{suit}");
     } else {
         card_name = format!("Card_{value:02}_{suit}");
     }
     return card_name;
 }
 
-fn indexToValue(index: usize) -> usize {
+fn index_to_value_str(index: usize) -> usize {
     let value = (13 - (index % 13)) + 1;
     return value;
 }
 
-fn indexToSuit(index: usize) -> &'static str {
+fn index_to_suit(index: usize) -> &'static str {
     let suit = index / 13;
-    let suitNameTable = [
-        "Clubs", "Dimonds", "Hearts", "Spades", "Back"
-    ];
-    return suitNameTable[suit];
+    let suit_name_table = ["Clubs", "Dimonds", "Spades", "Hearts", "Back"];
+    return suit_name_table[suit];
 }
-
 
 fn main() {
     let img = image::open("export_cards.png").expect("File not found!");
-    let (width, height) = img.dimensions();
+    let (_width, height) = img.dimensions();
     let jsonfile = fs::read_to_string("export_cards.json").expect("Unable to read file");
 
-    let spritedata: SpriteJson = serde_json::from_str(&jsonfile).expect("JSON was not well-formatted");
+    let spritedata: SpriteJson =
+        serde_json::from_str(&jsonfile).expect("JSON was not well-formatted");
     let sprites: Vec<Sprite> = spritedata.texture_importer.sprite_sheet.sprites;
 
     let slen = sprites.len();
@@ -271,18 +267,17 @@ fn main() {
         let sx = sprite.rect.x;
         let sy = height as i64 - sprite.rect.y - sprite.rect.height;
         let index = if i != 0 { i - 1 } else { slen - 1 };
-        let value = indexToValue(index);
-        let suit = indexToSuit(index);
-        let card_name = getCardName(value, suit);
+        let value = index_to_value_str(index);
+        let suit = index_to_suit(index);
+        let card_name = get_card_name(value, suit);
 
         println!("{i}, {card_name}");
 
         let subimg = img.view(sx as u32, sy as u32, sw as u32, sh as u32);
-        subimg.to_image()
+        subimg
+            .to_image()
             .save_with_format(format!("{card_name}.png"), ImageFormat::Png)
             .unwrap();
-        i+=1;
+        i += 1;
     }
-
-
 }
